@@ -1,0 +1,34 @@
+# Dependencies
+node_modules/
+*.egg-info/
+__pycache__/
+.venv/
+venv/
+
+# Build outputs
+dist/
+build/
+*.jar
+*.exe
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Docker
+.dockerignore
