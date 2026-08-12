@@ -1,13 +1,17 @@
 # Dependencies
 node_modules/
-.pnp
-.pnp.js
+*.egg-info/
+__pycache__/
+.venv/
+venv/
 
-# Production
-build/
+# Build outputs
 dist/
+build/
+*.jar
+*.exe
 
-# Environment
+# Environment variables
 .env
 .env.local
 .env.*.local
@@ -21,11 +25,10 @@ dist/
 .DS_Store
 
 # Logs
-logs/
 *.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
-# Database
-postgres_data/
+# Docker
+.dockerignore

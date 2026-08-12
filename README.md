@@ -1,133 +1,205 @@
 # Museum Visitor Book
 
-A full-stack web application for managing museum visitor signatures and comments.
-
-## Architecture
-
-- **Frontend**: React 18 + Vite (SPA)
-- **Backend**: Node.js 18 + Express.js (REST API)
-- **Database**: PostgreSQL 15
-- **Containerization**: Docker + Docker Compose
-
-## Quick Start
-
-### Prerequisites
-- Docker and Docker Compose installed
-
-### Running the Application
-
-```bash
-docker compose up --build
-```
-
-The application will be available at:
-- **Frontend**: http://localhost
-- **Backend API**: http://localhost:3000
-- **Database**: localhost:5432
-
-### Stopping the Application
-
-```bash
-docker compose down
-```
+A web application for managing museum visitor registrations. Visitors can sign a digital guest book and view recent visits.
 
 ## Project Structure
 
 ```
 .
-├── docker-compose.yml          # Docker Compose configuration
-├── backend/
-│   ├── Dockerfile              # Backend container image
-│   ├── package.json            # Node.js dependencies
+├── backend/              # Node.js Express API
 │   ├── src/
-│   │   └── index.js            # Express server entry point
-│   └── init.sql                # Database schema initialization
-├── frontend/
-│   ├── Dockerfile              # Frontend container image
-│   ├── package.json            # React dependencies
-│   ├── vite.config.js          # Vite configuration
-│   ├── index.html              # HTML entry point
-│   ├── nginx.conf              # Nginx configuration
-│   └── src/
-│       ├── main.jsx            # React entry point
-│       ├── App.jsx             # Main React component
-│       └── App.css             # Styles
-└── README.md                   # This file
+│   │   └── index.js     # Main server file
+│   ├── init.sql         # Database schema
+│   ├── package.json
+│   └── Dockerfile
+├── frontend/            # React + Vite SPA
+│   ├── src/
+│   │   ├── App.jsx
+│   │   ├── App.css
+│   │   └── main.jsx
+│   ├── index.html
+│   ├── package.json
+│   ├── vite.config.js
+│   ├── nginx.conf
+│   └── Dockerfile
+├── docker-compose.yml   # Orchestration
+└── README.md
 ```
+
+## Tech Stack
+
+
+## Features
+
 
 ## API Endpoints
 
-### Visitors
+### POST /api/visits
+Register a new visit.
 
-- `GET /api/visitors` - Get all visitors
-- `GET /api/visitors/:id` - Get visitor by ID
-- `POST /api/visitors` - Create new visitor
-- `PUT /api/visitors/:id` - Update visitor
-- `DELETE /api/visitors/:id` - Delete visitor
-
-### Health Check
-
-- `GET /health` - API health status
-
-## Database Schema
-
-### visitors table
-
-```sql
-CREATE TABLE visitors (
-  id SERIAL PRIMARY KEY,
-  name VARCHAR(255) NOT NULL,
-  email VARCHAR(255) NOT NULL,
-  visit_date TIMESTAMP DEFAULT NOW(),
-  comments TEXT,
-  created_at TIMESTAMP DEFAULT NOW()
-);
+**Request Body:**
+```json
+{
+ "visitor_name": "John Doe",
+ "visitor_email": "john@example.com",
+ "comments": "Great museum!"
+}
 ```
 
-## Environment Variables
+**Response (201):**
+```json
+{
+ "id": 1,
+ "visitor_name": "John Doe",
+ "visitor_email": "john@example.com",
+ "visit_date": "2024-01-15T10:30:00.000Z",
+ "comments": "Great museum!",
+ "created_at": "2024-01-15T10:30:00.000Z"
+}
+```
 
-### Backend
+### GET /api/visits
+Retrieve list of recent visits (max 100, ordered by date descending).
 
-- `NODE_ENV` - Environment (production/development)
-- `DB_HOST` - PostgreSQL host
-- `DB_PORT` - PostgreSQL port
-- `DB_USER` - PostgreSQL user
-- `DB_PASSWORD` - PostgreSQL password
-- `DB_NAME` - PostgreSQL database name
-- `API_PORT` - API server port
+**Response (200):**
+```json
+[
+ {
+   "id": 1,
+   "visitor_name": "John Doe",
+   "visitor_email": "john@example.com",
+   "visit_date": "2024-01-15T10:30:00.000Z",
+   "comments": "Great museum!",
+   "created_at": "2024-01-15T10:30:00.000Z"
+ }
+]
+```
 
-### Frontend
+### GET /api/visits/:id
+Retrieve a specific visit by ID.
 
-- `VITE_API_URL` - Backend API URL (build-time variable)
+**Response (200):**
+```json
+{
+ "id": 1,
+ "visitor_name": "John Doe",
+ "visitor_email": "john@example.com",
+ "visit_date": "2024-01-15T10:30:00.000Z",
+ "comments": "Great museum!",
+ "created_at": "2024-01-15T10:30:00.000Z"
+}
+```
+
+## Getting Started
+
+### Prerequisites
+
+### Installation & Running
+
+1. Clone the repository:
+```bash
+git clone <repository-url>
+cd museum-visitor-book
+```
+
+2. Build and start the application:
+```bash
+docker compose up --build
+```
+
+3. Access the application:
+
+### Environment Variables
+
+Create a `.env` file in the project root (optional, defaults provided):
+
+```env
+DB_USER=postgres
+DB_PASSWORD=postgres
+DB_NAME=museum_db
+```
 
 ## Development
 
-### Backend Development
+### Local Development (without Docker)
 
+**Backend:**
 ```bash
 cd backend
 npm install
-npm run dev
+DB_HOST=localhost npm start
 ```
 
-### Frontend Development
-
+**Frontend:**
 ```bash
 cd frontend
 npm install
 npm run dev
 ```
 
-## Features
+### Database
 
-- ✅ Add visitor signatures with name, email, and comments
-- ✅ View all visitor entries with timestamps
-- ✅ Edit existing visitor information
-- ✅ Delete visitor entries
-- ✅ Responsive design for mobile and desktop
-- ✅ Real-time API communication
-- ✅ Database persistence
-- ✅ Docker containerization for easy deployment
+The database schema is automatically initialized from `backend/init.sql` when the container starts.
+
+**Tables:**
+ - `id` (SERIAL PRIMARY KEY)
+ - `visitor_name` (VARCHAR 255, NOT NULL)
+ - `visitor_email` (VARCHAR 255)
+ - `visit_date` (TIMESTAMP, DEFAULT CURRENT_TIMESTAMP)
+ - `comments` (TEXT)
+ - `created_at` (TIMESTAMP, DEFAULT CURRENT_TIMESTAMP)
+
+## Testing
+
+### Health Checks
+
+All services include health checks:
+
+```bash
+# Backend health
+curl http://localhost:3000/health
+
+# Frontend health
+curl http://localhost/health
+
+# Database health (via docker)
+docker exec museum_db pg_isready -U postgres
+```
+
+### Manual Testing
+
+```bash
+# Register a visit
+curl -X POST http://localhost/api/visits \
+ -H "Content-Type: application/json" \
+ -d '{
+   "visitor_name": "Jane Smith",
+   "visitor_email": "jane@example.com",
+   "comments": "Wonderful experience!"
+ }'
+
+# Get all visits
+curl http://localhost/api/visits
+
+# Get specific visit
+curl http://localhost/api/visits/1
+```
+
+## Troubleshooting
+
+### Container won't start
+```bash
+# Check logs
+docker compose logs -f
+
+# Rebuild
+docker compose down
+docker compose up --build
+```
+
+### Database connection error
+
+### Frontend not loading
 
 ## License
 

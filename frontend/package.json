@@ -1,5 +1,6 @@
 {
-  "name": "museum-visitor-book-frontend",
+  "name": "museum-frontend",
+  "private": true,
   "version": "1.0.0",
   "type": "module",
   "scripts": {
@@ -9,8 +10,7 @@
   },
   "dependencies": {
     "react": "^18.2.0",
-    "react-dom": "^18.2.0",
-    "axios": "^1.6.2"
+    "react-dom": "^18.2.0"
   },
   "devDependencies": {
     "@vitejs/plugin-react": "^4.2.1",
