@@ -1,0 +1,69 @@
+version: '3.9'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: museum_postgres
+    environment:
+      POSTGRES_USER: museum_user
+      POSTGRES_PASSWORD: museum_pass
+      POSTGRES_DB: museum_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./backend/init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U museum_user -d museum_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - museum_network
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: museum_backend
+    environment:
+      NODE_ENV: production
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USER: museum_user
+      DB_PASSWORD: museum_pass
+      DB_NAME: museum_db
+      API_PORT: 3000
+    ports:
+      - "3000:3000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://127.0.0.1:3000/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - museum_network
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: museum_frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    environment:
+      VITE_API_URL: http://backend:3000
+    networks:
+      - museum_network
+
+volumes:
+  postgres_data:
+
+networks:
+  museum_network:
+    driver: bridge
