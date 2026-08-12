@@ -1,117 +1,62 @@
-import { useState, useEffect } from 'react'
-import './App.css'
+import { useState, useEffect } from 'react';
+import './App.css';
+import VisitorForm from './components/VisitorForm';
+import AdminPanel from './components/AdminPanel';
+import LoginPage from './components/LoginPage';
 
 function App() {
-  const [visitors, setVisitors] = useState([])
-  const [loading, setLoading] = useState(false)
-  const [formData, setFormData] = useState({ name: '', email: '', message: '' })
-  const [error, setError] = useState('')
+  const [token, setToken] = useState(localStorage.getItem('token'));
+  const [showAdmin, setShowAdmin] = useState(false);
+  const [user, setUser] = useState(null);
 
   useEffect(() => {
-    fetchVisitors()
-  }, [])
-
-  const fetchVisitors = async () => {
-    try {
-      setLoading(true)
-      const response = await fetch('/api/visitors')
-      if (!response.ok) throw new Error('Failed to fetch visitors')
-      const data = await response.json()
-      setVisitors(data)
-    } catch (err) {
-      setError(err.message)
-    } finally {
-      setLoading(false)
+    if (token) {
+      const storedUser = localStorage.getItem('user');
+      if (storedUser) {
+        setUser(JSON.parse(storedUser));
+      }
     }
+  }, [token]);
+
+  const handleLogin = (newToken, userData) => {
+    setToken(newToken);
+    setUser(userData);
+    localStorage.setItem('token', newToken);
+    localStorage.setItem('user', JSON.stringify(userData));
+    setShowAdmin(true);
+  };
+
+  const handleLogout = () => {
+    setToken(null);
+    setUser(null);
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    setShowAdmin(false);
+  };
+
+  if (showAdmin && token) {
+    return <AdminPanel token={token} user={user} onLogout={handleLogout} />;
   }
 
-  const handleInputChange = (e) => {
-    const { name, value } = e.target
-    setFormData(prev => ({ ...prev, [name]: value }))
+  if (token && !showAdmin) {
+    return (
+      <div className="app-container">
+        <header className="app-header">
+          <h1>Livro de Visitas - Museu</h1>
+          <div className="header-actions">
+            <span className="user-info">Olá, {user?.username}</span>
+            <button className="btn-logout" onClick={handleLogout}>Sair</button>
+            <button className="btn-admin" onClick={() => setShowAdmin(true)}>Painel Admin</button>
+          </div>
+        </header>
+        <main className="app-main">
+          <VisitorForm token={token} />
+        </main>
+      </div>
+    );
   }
 
-  const handleSubmit = async (e) => {
-    e.preventDefault()
-    if (!formData.name || !formData.email) {
-      setError('Name and email are required')
-      return
-    }
-    try {
-      setLoading(true)
-      const response = await fetch('/api/visitors', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
-      })
-      if (!response.ok) throw new Error('Failed to add visitor')
-      setFormData({ name: '', email: '', message: '' })
-      setError('')
-      await fetchVisitors()
-    } catch (err) {
-      setError(err.message)
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  return (
-    <div className="container">
-      <h1>Museum Visitor Book</h1>
-      
-      <form onSubmit={handleSubmit} className="form">
-        <div className="form-group">
-          <label htmlFor="name">Name:</label>
-          <input
-            type="text"
-            id="name"
-            name="name"
-            value={formData.name}
-            onChange={handleInputChange}
-            required
-          />
-        </div>
-        <div className="form-group">
-          <label htmlFor="email">Email:</label>
-          <input
-            type="email"
-            id="email"
-            name="email"
-            value={formData.email}
-            onChange={handleInputChange}
-            required
-          />
-        </div>
-        <div className="form-group">
-          <label htmlFor="message">Message:</label>
-          <textarea
-            id="message"
-            name="message"
-            value={formData.message}
-            onChange={handleInputChange}
-            rows="4"
-          />
-        </div>
-        <button type="submit" disabled={loading}>
-          {loading ? 'Submitting...' : 'Sign Visitor Book'}
-        </button>
-      </form>
-
-      {error && <div className="error">{error}</div>}
-
-      <h2>Recent Visitors</h2>
-      {loading && <p>Loading...</p>}
-      {visitors.length === 0 && !loading && <p>No visitors yet.</p>}
-      <ul className="visitors-list">
-        {visitors.map(visitor => (
-          <li key={visitor.id} className="visitor-item">
-            <strong>{visitor.name}</strong> ({visitor.email})
-            {visitor.message && <p>{visitor.message}</p>}
-            <small>{new Date(visitor.created_at).toLocaleString()}</small>
-          </li>
-        ))}
-      </ul>
-    </div>
-  )
+  return <LoginPage onLogin={handleLogin} />;
 }
 
-export default App
+export default App;

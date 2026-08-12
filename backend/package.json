@@ -1,7 +1,7 @@
 {
-  "name": "museum-backend",
-  "version": "1.0.0",
-  "description": "Museum visitor book backend",
+  "name": "museum-visitor-backend",
+  "version": "2.0.0",
+  "description": "Backend para livro de visitas ao museu",
   "main": "src/index.js",
   "scripts": {
     "start": "node src/index.js",
@@ -9,10 +9,9 @@
   },
   "dependencies": {
     "express": "^4.18.2",
+    "cors": "^2.8.5",
     "pg": "^8.11.3",
-    "cors": "^2.8.5"
-  },
-  "engines": {
-    "node": ">=18.0.0"
+    "bcryptjs": "^2.4.3",
+    "jsonwebtoken": "^9.0.2"
   }
 }

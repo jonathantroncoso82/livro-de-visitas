@@ -1,206 +1,91 @@
-# Museum Visitor Book
+# Livro de Visitas - Museu
 
-A web application for managing museum visitor registrations. Visitors can sign a digital guest book and view recent visits.
+Aplicação web para registro e gestão de visitantes em museus.
 
-## Project Structure
-
-```
-.
-├── backend/              # Node.js Express API
-│   ├── src/
-│   │   └── index.js     # Main server file
-│   ├── init.sql         # Database schema
-│   ├── package.json
-│   └── Dockerfile
-├── frontend/            # React + Vite SPA
-│   ├── src/
-│   │   ├── App.jsx
-│   │   ├── App.css
-│   │   └── main.jsx
-│   ├── index.html
-│   ├── package.json
-│   ├── vite.config.js
-│   ├── nginx.conf
-│   └── Dockerfile
-├── docker-compose.yml   # Orchestration
-└── README.md
-```
-
-## Tech Stack
+## Stack
 
 
-## Features
+## Funcionalidades
 
+### Ciclo 1 - Formulário de Visitantes
 
-## API Endpoints
+### Ciclo 2 - Painel Administrativo e Conformidade
 
-### POST /api/visits
-Register a new visit.
+## Como Executar
 
-**Request Body:**
-```json
-{
- "visitor_name": "John Doe",
- "visitor_email": "john@example.com",
- "comments": "Great museum!"
-}
-```
+### Pré-requisitos
 
-**Response (201):**
-```json
-{
- "id": 1,
- "visitor_name": "John Doe",
- "visitor_email": "john@example.com",
- "visit_date": "2024-01-15T10:30:00.000Z",
- "comments": "Great museum!",
- "created_at": "2024-01-15T10:30:00.000Z"
-}
-```
+### Iniciar a Aplicação
 
-### GET /api/visits
-Retrieve list of recent visits (max 100, ordered by date descending).
-
-**Response (200):**
-```json
-[
- {
-   "id": 1,
-   "visitor_name": "John Doe",
-   "visitor_email": "john@example.com",
-   "visit_date": "2024-01-15T10:30:00.000Z",
-   "comments": "Great museum!",
-   "created_at": "2024-01-15T10:30:00.000Z"
- }
-]
-```
-
-### GET /api/visits/:id
-Retrieve a specific visit by ID.
-
-**Response (200):**
-```json
-{
- "id": 1,
- "visitor_name": "John Doe",
- "visitor_email": "john@example.com",
- "visit_date": "2024-01-15T10:30:00.000Z",
- "comments": "Great museum!",
- "created_at": "2024-01-15T10:30:00.000Z"
-}
-```
-
-## Getting Started
-
-### Prerequisites
-
-### Installation & Running
-
-1. Clone the repository:
-```bash
-git clone <repository-url>
-cd museum-visitor-book
-```
-
-2. Build and start the application:
 ```bash
 docker compose up --build
 ```
 
-3. Access the application:
+A aplicação estará disponível em:
 
-### Environment Variables
+### Credenciais Padrão
 
-Create a `.env` file in the project root (optional, defaults provided):
 
-```env
-DB_USER=postgres
-DB_PASSWORD=postgres
-DB_NAME=museum_db
+## Estrutura do Projeto
+
+```
+.
+├── backend/
+│   ├── src/
+│   │   └── index.js          # Servidor Express
+│   ├── init.sql              # Schema do banco de dados
+│   ├── package.json          # Dependências Node.js
+│   └── Dockerfile            # Build do backend
+├── frontend/
+│   ├── src/
+│   │   ├── components/       # Componentes React
+│   │   ├── styles/           # Estilos CSS
+│   │   ├── App.jsx           # Componente principal
+│   │   └── main.jsx          # Entry point
+│   ├── index.html            # HTML principal
+│   ├── package.json          # Dependências React
+│   ├── nginx.conf            # Configuração Nginx
+│   └── Dockerfile            # Build do frontend
+├── docker-compose.yml        # Orquestração de containers
+└── README.md                 # Este arquivo
 ```
 
-## Development
+## Endpoints da API
 
-### Local Development (without Docker)
+### Autenticação
 
-**Backend:**
+### Visitantes
+
+### Relatórios
+
+### Auditoria
+
+## Variáveis de Ambiente
+
+```
+DB_USER=museum_user
+DB_PASSWORD=museum_pass
+DB_HOST=db
+DB_PORT=5432
+DB_NAME=museum_db
+JWT_SECRET=dev-secret-key-change-in-production
+PORT=3000
+```
+
+## Desenvolvimento
+
+### Backend
 ```bash
 cd backend
 npm install
-DB_HOST=localhost npm start
+npm start
 ```
 
-**Frontend:**
+### Frontend
 ```bash
 cd frontend
 npm install
 npm run dev
 ```
 
-### Database
-
-The database schema is automatically initialized from `backend/init.sql` when the container starts.
-
-**Tables:**
- - `id` (SERIAL PRIMARY KEY)
- - `visitor_name` (VARCHAR 255, NOT NULL)
- - `visitor_email` (VARCHAR 255)
- - `visit_date` (TIMESTAMP, DEFAULT CURRENT_TIMESTAMP)
- - `comments` (TEXT)
- - `created_at` (TIMESTAMP, DEFAULT CURRENT_TIMESTAMP)
-
-## Testing
-
-### Health Checks
-
-All services include health checks:
-
-```bash
-# Backend health
-curl http://localhost:3000/health
-
-# Frontend health
-curl http://localhost/health
-
-# Database health (via docker)
-docker exec museum_db pg_isready -U postgres
-```
-
-### Manual Testing
-
-```bash
-# Register a visit
-curl -X POST http://localhost/api/visits \
- -H "Content-Type: application/json" \
- -d '{
-   "visitor_name": "Jane Smith",
-   "visitor_email": "jane@example.com",
-   "comments": "Wonderful experience!"
- }'
-
-# Get all visits
-curl http://localhost/api/visits
-
-# Get specific visit
-curl http://localhost/api/visits/1
-```
-
-## Troubleshooting
-
-### Container won't start
-```bash
-# Check logs
-docker compose logs -f
-
-# Rebuild
-docker compose down
-docker compose up --build
-```
-
-### Database connection error
-
-### Frontend not loading
-
-## License
-
-MIT
+## Notas de Segurança

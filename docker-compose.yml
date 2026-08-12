@@ -1,73 +1,62 @@
 services:
   db:
-    image: postgres:16-alpine
-    container_name: museum_db
+    image: postgres:15-alpine
     environment:
-      POSTGRES_USER: ${DB_USER:-postgres}
-      POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres}
+      POSTGRES_USER: ${DB_USER:-museum_user}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-museum_pass}
       POSTGRES_DB: ${DB_NAME:-museum_db}
     volumes:
       - ./backend/init.sql:/docker-entrypoint-initdb.d/init.sql
       - postgres_data:/var/lib/postgresql/data
     ports:
       - "5432:5432"
-    networks:
-      - museum_network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-postgres}"]
+      test: ["CMD-SHELL", "pg_isready -U museum_user"]
       interval: 10s
       timeout: 5s
       retries: 5
+    networks:
+      - museum-network
 
   backend:
     build:
-      context: .
-      dockerfile: backend/Dockerfile
-    container_name: museum_backend
+      context: ./backend
+      dockerfile: Dockerfile
     environment:
-      NODE_ENV: production
-      PORT: 3000
-      DB_USER: ${DB_USER:-postgres}
-      DB_PASSWORD: ${DB_PASSWORD:-postgres}
+      DB_USER: ${DB_USER:-museum_user}
+      DB_PASSWORD: ${DB_PASSWORD:-museum_pass}
       DB_HOST: db
       DB_PORT: 5432
       DB_NAME: ${DB_NAME:-museum_db}
+      JWT_SECRET: ${JWT_SECRET:-dev-secret-key-change-in-production}
+      PORT: 3000
     ports:
       - "3000:3000"
     depends_on:
       db:
         condition: service_healthy
     networks:
-      - museum_network
+      - museum-network
     healthcheck:
-      test: ["CMD", "node", "-e", "require('http').get('http://127.0.0.1:3000/health', (r) => {if (r.statusCode !== 200) throw new Error(r.statusCode)})"]
-      interval: 30s
-      timeout: 3s
-      start_period: 5s
-      retries: 3
+      test: ["CMD", "curl", "-f", "http://127.0.0.1:3000/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   frontend:
     build:
-      context: .
-      dockerfile: frontend/Dockerfile
-    container_name: museum_frontend
+      context: ./frontend
+      dockerfile: Dockerfile
     ports:
       - "80:80"
     depends_on:
       - backend
     networks:
-      - museum_network
-    healthcheck:
-      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://127.0.0.1/health"]
-      interval: 30s
-      timeout: 3s
-      start_period: 5s
-      retries: 3
-
-networks:
-  museum_network:
-    driver: bridge
+      - museum-network
 
 volumes:
   postgres_data:
-    driver: local
+
+networks:
+  museum-network:
+    driver: bridge
